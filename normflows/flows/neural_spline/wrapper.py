@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from typing import Optional
 import numpy as np
 
 from ..base import Flow
@@ -30,6 +31,7 @@ class CoupledRationalQuadraticSpline(Flow):
         dropout_probability=0.0,
         reverse_mask=False,
         init_identity=True,
+        feature_mask:Optional[torch.Tensor]=None
     ):
         """Constructor
 
@@ -45,6 +47,7 @@ class CoupledRationalQuadraticSpline(Flow):
           dropout_probability (float): Dropout probability of the NN
           reverse_mask (bool): Flag whether the reverse mask should be used
           init_identity (bool): Flag, initialize transform as identity
+          feature_mask (Optional[torch.Tensor]): if supplied, a manual mask for which dimenions may be transformed (> 0) or not (<= 0). See coupling
         """
         super().__init__()
 
@@ -67,7 +70,7 @@ class CoupledRationalQuadraticSpline(Flow):
             return net
 
         self.prqct = PiecewiseRationalQuadraticCoupling(
-            mask=create_alternating_binary_mask(num_input_channels, even=reverse_mask),
+            mask=(feature_mask if feature_mask is not None else create_alternating_binary_mask(num_input_channels, even=reverse_mask)),
             transform_net_create_fn=transform_net_create_fn,
             num_bins=num_bins,
             tails=tails,

@@ -178,7 +178,7 @@ def rational_quadratic_spline(
         c = -input_delta * (inputs - input_cumheights)
 
         discriminant = b.pow(2) - 4 * a * c
-        assert (discriminant >= 0).all()
+        assert (discriminant >= -1e-6 * torch.maximum(b.pow(2), torch.abs(4*a*c))).all() # See https://github.com/bayesiains/nflows/pull/71
 
         root = (2 * c) / (-b - torch.sqrt(discriminant))
         outputs = root * input_bin_widths + input_cumwidths
